@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0%;
+            padding: 0%;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
+        }
+
+        main {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .progress-bar {
+            height: 30px;
+            width: 300px;
+            background-color: #eee;
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .bar {
+            height: 100%;
+            width: 50%;
+        }
+
+        .yes-bar {
+            background-color: #4caf50;
+        }
+
+        .no-bar {
+            background-color: #f44336;
+        }
+
+        .count {
+            margin: 20px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+
+        .vote-btns {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            justify-content: center;
+
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        .yes-btn {
+            background-color: #4caf50;
+        }
+
+        .no-btn {
+            background-color: #f44336;
+        }
+
+    </style>
+</head>
+<body>
+    <main>
+        <section>
+            <div class="progress-bar">
+                <div class="bar yes-bar"></div>
+                <div class="bar no-bar"></div>
+            </div>
+            <div class="count">
+                    <span class="yes-count">0</span> :
+                    <span class="no-count">0</span>
+            </div>
+            <div class="vote-btns">
+                <button class="btn yes-btn">Yes</button>
+                <button class="btn no-btn">No</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+
+        const roomName = prompt("Enter room name:")
+
+        
+        const socket = io({
+            query: {
+                room: roomName
+            }
+        })
+
+
+        document.querySelector('.yes-btn').addEventListener('click', () => {
+            socket.emit('vote_yes')
+        })
+        document.querySelector('.no-btn').addEventListener('click', () => {
+            socket.emit('vote_no')
+        })
+
+        socket.on("vote_update", (votes) => {
+            const { yes, no } = votes
+            const totalVotes = yes + no
+            const yesPercent = totalVotes ? (yes / totalVotes) * 100 : 0
+            const noPercent = totalVotes ? (no / totalVotes) * 100 : 0
+
+            document.querySelector('.yes-bar').style.width = `${yesPercent}%`
+            document.querySelector('.no-bar').style.width = `${noPercent}%`
+            document.querySelector('.yes-count').textContent = yes
+            document.querySelector('.no-count').textContent = no
+        })
+
+    </script>
+</body>
+</html>

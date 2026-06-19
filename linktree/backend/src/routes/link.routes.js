@@ -6,4 +6,6 @@ const router = Router();
 
 router.post("/", authMiddleware, linkController.createLink)
 
+router.get("/:username", linkController.getLinksByUsername)
+
 export default router;

@@ -49,3 +49,24 @@ export const getLinksByUsername = async (req, res) => {
         links,
     });
 }
+
+export const incrementLinkClick = async (req, res) => {
+
+    const { linkId } = req.params;
+
+    const link = await linkModel.findById(linkId);
+
+    if (!link) {
+        return res.status(404).json({
+            message: 'Link not found',
+        });
+    }
+
+    link.clicks += 1;
+    await link.save();
+
+    return res.status(200).json({
+        message: 'Link click incremented successfully',
+        link,
+    });
+}

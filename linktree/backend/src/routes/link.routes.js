@@ -13,4 +13,7 @@ router.post("/", authMiddleware, linkController.createLink)
  */
 router.get("/:username", linkController.getLinksByUsername)
 
+
+router.patch("/:linkId/click", linkController.incrementLinkClick)
+
 export default router;

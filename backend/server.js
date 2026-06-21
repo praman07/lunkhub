@@ -1,7 +1,6 @@
 import app from './src/app.js';
 import connectDB from './src/db/mongoose.js';
 
-
 connectDB();
 
 const PORT = process.env.PORT || 3000;

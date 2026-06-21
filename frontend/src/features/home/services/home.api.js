@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const linkApiInstance = axios.create({
     baseURL: '/api/links',
+    withCredentials: true,
 })
 
 

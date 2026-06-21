@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const analyticsApiInstance = axios.create({
     baseURL: '/api/link',
+    withCredentials: true,
 });
 
 export const getAnalytics = async ({ username }) => {

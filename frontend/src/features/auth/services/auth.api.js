@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const authApiInstance = axios.create({
     baseURL: '/api/auth',
+    withCredentials: true,
 });
 
 export const register = async ({ username, email, password }) => {

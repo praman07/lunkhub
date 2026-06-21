@@ -6,7 +6,7 @@ import { useAuth } from "../../auth/hooks/useAuth"
 const Home = () => {
     const { username } = useParams()
     const { fetchLinks, handleLinkClick, createNewLink, modifyLink, removeLink } = useHome()
-    const { user, logout } = useAuth()
+    const { user, loading, logout } = useAuth()
     
     const [links, setLinks] = useState([])
     const [loadingProfile, setLoadingProfile] = useState(true)
@@ -115,7 +115,7 @@ const Home = () => {
         }
     }
 
-    if (loadingProfile) {
+    if (loadingProfile || loading) {
         return (
             <div className="min-h-screen bg-[#eff0ec] flex items-center justify-center text-[#1e2330]">
                 <div className="flex flex-col items-center gap-4">

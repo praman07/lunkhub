@@ -4,6 +4,7 @@ import Home from "../features/home/pages/Home"
 import Login from "../features/auth/pages/Login"
 import Register from "../features/auth/pages/Register"
 import Analytics from "../features/analytics/pages/Analytics"
+import { useAuth } from "../features/auth/hooks/useAuth"
 
 // 3D Tilting Card Component for Influencer Grid
 const InfluencerCard = ({ inf, idx }) => {
@@ -137,6 +138,7 @@ const ShowcaseCard = ({ children, delay }) => {
 
 const LandingPage = () => {
     const navigate = useNavigate()
+    const { user, logout } = useAuth()
     const platformSectionRef = useRef(null)
     const [usernameInput, setUsernameInput] = useState('')
     const [selectedTab, setSelectedTab] = useState('musician')
@@ -570,12 +572,25 @@ const LandingPage = () => {
                         <span className="text-2xl font-black tracking-tighter text-[#1e2330]">linkhub</span>
                     </div>
                     <div className="flex items-center gap-4">
-                        <Link to="/login" className="px-5 py-2.5 rounded-full bg-[#eff0ec] text-sm font-black text-[#1e2330] hover:bg-[#1e2330] hover:text-white hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ease-out">
-                            Log In
-                        </Link>
-                        <Link to="/register" className="px-5 py-2.5 rounded-full bg-[#1e2330] text-sm font-black text-white hover:bg-[#254f1a] hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ease-out">
-                            Sign Up Free
-                        </Link>
+                        {user ? (
+                            <>
+                                <Link to={`/${user.username}`} className="px-5 py-2.5 rounded-full bg-[#eff0ec] text-sm font-black text-[#1e2330] hover:bg-[#1e2330] hover:text-white hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ease-out">
+                                    My Dashboard
+                                </Link>
+                                <button onClick={logout} className="px-5 py-2.5 rounded-full bg-[#780016] text-sm font-black text-white hover:brightness-110 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer">
+                                    Log Out
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link to="/login" className="px-5 py-2.5 rounded-full bg-[#eff0ec] text-sm font-black text-[#1e2330] hover:bg-[#1e2330] hover:text-white hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ease-out">
+                                    Log In
+                                </Link>
+                                <Link to="/register" className="px-5 py-2.5 rounded-full bg-[#1e2330] text-sm font-black text-white hover:bg-[#254f1a] hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ease-out">
+                                    Sign Up Free
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             </nav>

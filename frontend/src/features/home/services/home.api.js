@@ -28,3 +28,15 @@ export const addLink = async ({ title, url }) => {
     console.log(response.data)
     return response.data;
 }
+
+export const updateLinkApi = async ({ linkId, title, url }) => {
+    const response = await linkApiInstance.put(`/${linkId}`, { title, url });
+    console.log(response.data)
+    return response.data;
+}
+
+export const deleteLinkApi = async ({ linkId }) => {
+    const response = await linkApiInstance.delete(`/${linkId}`);
+    console.log(response.data)
+    return response.data;
+}

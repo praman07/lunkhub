@@ -16,5 +16,7 @@ router.get("/:username", linkController.getLinksByUsername)
 router.get("/:username/analytics", authMiddleware, linkController.getLinkAnalyticsByUsername)
 
 router.patch("/:linkId/click", linkController.incrementLinkClick)
+router.put("/:linkId", authMiddleware, linkController.updateLink)
+router.delete("/:linkId", authMiddleware, linkController.deleteLink)
 
 export default router;

@@ -8,7 +8,9 @@ import Analytics from "../features/analytics/pages/Analytics"
 // 3D Tilting Card Component for Influencer Grid
 const InfluencerCard = ({ inf, idx }) => {
     const [tiltStyle, setTiltStyle] = useState({
-        transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)'
+        transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+        boxShadow: 'none',
+        transition: 'transform 0.5s ease-out, box-shadow 0.5s ease-out'
     })
 
     const handleMouseMove = (e) => {
@@ -16,33 +18,35 @@ const InfluencerCard = ({ inf, idx }) => {
         const rect = card.getBoundingClientRect()
         const x = e.clientX - rect.left - rect.width / 2
         const y = e.clientY - rect.top - rect.height / 2
-        
-        // Tilt degrees capped at 15
+
+        // Tilt degrees capped at 14
         const rotX = -(y / (rect.height / 2)) * 14
         const rotY = (x / (rect.width / 2)) * 14
 
         setTiltStyle({
             transform: `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.03, 1.03, 1.03)`,
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)'
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            transition: 'transform 0.1s ease-out, box-shadow 0.1s ease-out'
         })
     }
 
     const handleMouseLeave = () => {
         setTiltStyle({
             transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
-            boxShadow: 'none'
+            boxShadow: 'none',
+            transition: 'transform 0.5s ease-out, box-shadow 0.5s ease-out'
         })
     }
 
     return (
         <div
-            style={{ 
-                ...tiltStyle, 
-                transitionDelay: `${idx * 120}ms` 
+            style={{
+                ...tiltStyle,
+                transitionDelay: tiltStyle.boxShadow === 'none' ? `${idx * 120}ms` : '0ms'
             }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            className="reveal tilt-card bg-white border border-slate-100 p-6 rounded-[32px] shadow-lg flex flex-col justify-between transition-all duration-200 relative group cursor-pointer"
+            className="reveal tilt-card bg-white border border-slate-100 p-6 rounded-[32px] shadow-lg flex flex-col justify-between relative group cursor-pointer"
         >
             <div className="space-y-4 tilt-card-inner">
                 {/* Creator Avatar & Verified Stamp */}
@@ -75,11 +79,58 @@ const InfluencerCard = ({ inf, idx }) => {
                             className="flex items-center justify-between p-2.5 rounded-full bg-[#eff0ec]/60 text-[10px] font-black text-[#1e2330] hover:bg-[#d2e823] transition duration-200 hover:-translate-y-px"
                         >
                             <span>{soc.platform}</span>
-                            <span className="opacity-60">↗</span>
                         </a>
                     ))}
                 </div>
             </div>
+        </div>
+    )
+}
+
+// 3D Tilting Card Component for Showcase Section
+const ShowcaseCard = ({ children, delay }) => {
+    const [tiltStyle, setTiltStyle] = useState({
+        transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+        boxShadow: 'none',
+        transition: 'transform 0.5s ease-out, box-shadow 0.5s ease-out'
+    })
+
+    const handleMouseMove = (e) => {
+        const card = e.currentTarget
+        const rect = card.getBoundingClientRect()
+        const x = e.clientX - rect.left - rect.width / 2
+        const y = e.clientY - rect.top - rect.height / 2
+
+        // Tilt degrees capped at 12
+        const rotX = -(y / (rect.height / 2)) * 12
+        const rotY = (x / (rect.width / 2)) * 12
+
+        setTiltStyle({
+            transform: `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.02, 1.02, 1.02)`,
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+            transition: 'transform 0.1s ease-out, box-shadow 0.1s ease-out'
+        })
+    }
+
+    const handleMouseLeave = () => {
+        setTiltStyle({
+            transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+            boxShadow: 'none',
+            transition: 'transform 0.5s ease-out, box-shadow 0.5s ease-out'
+        })
+    }
+
+    return (
+        <div
+            style={{
+                ...tiltStyle,
+                transitionDelay: tiltStyle.boxShadow === 'none' ? delay : '0ms'
+            }}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            className="reveal bg-white p-8 rounded-[36px] border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 group cursor-pointer"
+        >
+            {children}
         </div>
     )
 }
@@ -92,7 +143,7 @@ const LandingPage = () => {
     const [isAuto, setIsAuto] = useState(true)
     const [activeLinkIndex, setActiveLinkIndex] = useState(0)
     const [faqOpen, setFaqOpen] = useState(null)
-    
+
     // Platform scroll-lock stepping state
     const [platformStep, setPlatformStep] = useState(0)       // 0=idle, 1..N=showing card, N+1=stacked/done
     const [platformDone, setPlatformDone] = useState(false)   // true after full forward cycle
@@ -122,7 +173,7 @@ const LandingPage = () => {
     // Wheel-event hijack for Platform Stack (locks outer scroll, steps cards)
     useEffect(() => {
         const TOTAL_STEPS = platforms.length  // 8 cards → steps 1-8, then done
-        const COOLDOWN_MS = 480
+        const COOLDOWN_MS = 180
 
         const handleWheel = (e) => {
             // After completion, never intercept again
@@ -232,9 +283,9 @@ const LandingPage = () => {
             initials: 'SG',
             avatarImg: '/selena_avatar.png',
             links: [
-                { title: 'Listen on Spotify 🎵', url: 'https://open.spotify.com/artist/0C801y3Ky2z2JW313KOr6c' },
-                { title: 'Instagram Feed 📸', url: 'https://instagram.com/selenagomez' },
-                { title: 'Subscribe on YouTube 📺', url: 'https://www.youtube.com/user/SelenaGomezVEVO' }
+                { title: 'Official TikTok Feed', url: 'https://www.tiktok.com/@selenagomez' },
+                { title: 'Instagram Feed', url: 'https://instagram.com/selenagomez' },
+                { title: 'Subscribe on YouTube', url: 'https://www.youtube.com/@SelenaGomez' }
             ]
         },
         creator: {
@@ -247,9 +298,9 @@ const LandingPage = () => {
             initials: 'PW',
             avatarImg: '/pharrell_avatar.png',
             links: [
-                { title: 'Stream My Albums 🎵', url: 'https://open.spotify.com/artist/2rFgcrclgrH4H3fSA42sOk' },
-                { title: 'Instagram Portfolio 📸', url: 'https://instagram.com/pharrell' },
-                { title: 'Official VEVO Channel 📺', url: 'https://www.youtube.com/user/PharrellVEVO' }
+                { title: 'Official YouTube Channel', url: 'https://www.youtube.com/@PharrellWilliams' },
+                { title: 'Instagram Portfolio', url: 'https://instagram.com/pharrell' },
+                { title: 'Official VEVO Channel', url: 'https://www.youtube.com/user/PharrellVEVO' }
             ]
         },
         business: {
@@ -262,8 +313,8 @@ const LandingPage = () => {
             initials: 'TH',
             avatarImg: '/tony_avatar.png',
             links: [
-                { title: 'Tony Hawk Foundation 🛹', url: 'https://instagram.com/tonyhawk' },
-                { title: 'Follow on Twitter / X 🐦', url: 'https://x.com/tonyhawk' }
+                { title: 'Tony Hawk Foundation', url: 'https://instagram.com/tonyhawk' },
+                { title: 'Follow on Twitter / X', url: 'https://x.com/tonyhawk' }
             ]
         },
         podcast: {
@@ -276,8 +327,8 @@ const LandingPage = () => {
             initials: 'CC',
             avatarImg: '/comedy_avatar.png',
             links: [
-                { title: 'Viral TikToks 📱', url: 'https://www.tiktok.com/@comedycentral' },
-                { title: 'Watch Standup clips 📺', url: 'https://www.youtube.com/user/ComedyCentral' }
+                { title: 'Viral TikToks', url: 'https://www.tiktok.com/@comedycentral' },
+                { title: 'Watch Standup clips', url: 'https://www.youtube.com/user/ComedyCentral' }
             ]
         }
     }
@@ -300,57 +351,57 @@ const LandingPage = () => {
     ]
 
     const platforms = [
-        { 
-            name: 'Spotify', 
-            bgColor: 'bg-[#1DB954]', 
-            svgPath: 'M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424c-.18.295-.563.387-.857.207-2.35-1.438-5.305-1.764-8.785-.97-.333.075-.66-.135-.736-.468-.075-.333.136-.66.468-.736 3.807-.87 7.077-.496 9.704 1.11.295.18.387.563.206.857zm1.225-2.72c-.226.367-.707.487-1.074.26-2.69-1.654-6.79-2.134-9.97-1.17-.413.125-.847-.11-1.012-.533-.125-.413.11-.847.533-1.012 3.63-1.1 8.14-.564 11.26 1.35.367.227.487.708.26 1.075zm.105-2.82c-3.224-1.914-8.54-2.093-11.606-1.163-.495.15-1.02-.13-1.17-.625-.15-.495.13-1.02.625-1.17 3.536-1.07 9.403-.863 13.12 1.343.445.263.59.838.327 1.283-.263.444-.838.59-1.283.327z', 
-            url: 'https://spotify.com' 
+        {
+            name: 'LinkedIn',
+            bgColor: 'bg-[#0077B5]',
+            svgPath: 'M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z',
+            url: 'https://linkedin.com'
         },
-        { 
-            name: 'YouTube', 
-            bgColor: 'bg-[#FF0000]', 
-            svgPath: 'M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.518 3.545 12 3.545 12 3.545s-7.518 0-9.388.507a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.87.508 9.388.508 9.388.508s7.518 0 9.388-.508a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z', 
-            url: 'https://youtube.com' 
+        {
+            name: 'YouTube',
+            bgColor: 'bg-[#FF0000]',
+            svgPath: 'M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.518 3.545 12 3.545 12 3.545s-7.518 0-9.388.507a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.87.508 9.388.508 9.388.508s7.518 0 9.388-.508a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z',
+            url: 'https://youtube.com'
         },
-        { 
-            name: 'TikTok', 
-            bgColor: 'bg-[#000000]', 
-            svgPath: 'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.05 1.62 4.2 1.2 1.39 2.92 2.22 4.73 2.4v3.9c-1.63-.03-3.23-.49-4.63-1.32-.38-.23-.74-.49-1.07-.79-.01 2.58-.01 5.17-.01 7.75-.02 1.35-.29 2.7-.93 3.88-1.2 2.25-3.5 3.8-6.05 4.02-3.15.28-6.3-1.28-7.73-4.1-1.33-2.6-.74-5.95 1.4-7.89 1.76-1.57 4.25-2.07 6.45-1.32v4.03c-1.18-.4-2.5-.16-3.48.6-.96.76-1.42 2.01-1.17 3.2.22 1.1 1.09 2.01 2.19 2.24 1.57.34 3.23-.53 3.73-2.03.22-.62.29-1.28.28-1.94V.02z', 
-            url: 'https://tiktok.com' 
+        {
+            name: 'TikTok',
+            bgColor: 'bg-[#000000]',
+            svgPath: 'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.05 1.62 4.2 1.2 1.39 2.92 2.22 4.73 2.4v3.9c-1.63-.03-3.23-.49-4.63-1.32-.38-.23-.74-.49-1.07-.79-.01 2.58-.01 5.17-.01 7.75-.02 1.35-.29 2.7-.93 3.88-1.2 2.25-3.5 3.8-6.05 4.02-3.15.28-6.3-1.28-7.73-4.1-1.33-2.6-.74-5.95 1.4-7.89 1.76-1.57 4.25-2.07 6.45-1.32v4.03c-1.18-.4-2.5-.16-3.48.6-.96.76-1.42 2.01-1.17 3.2.22 1.1 1.09 2.01 2.19 2.24 1.57.34 3.23-.53 3.73-2.03.22-.62.29-1.28.28-1.94V.02z',
+            url: 'https://tiktok.com'
         },
-        { 
-            name: 'Instagram', 
-            bgColor: 'bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7]', 
-            svgPath: 'M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z', 
-            url: 'https://instagram.com' 
+        {
+            name: 'Instagram',
+            bgColor: 'bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7]',
+            svgPath: 'M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z',
+            url: 'https://instagram.com'
         },
-        { 
-            name: 'X / Twitter', 
-            bgColor: 'bg-[#111111]', 
-            svgPath: 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z', 
-            url: 'https://x.com' 
+        {
+            name: 'X / Twitter',
+            bgColor: 'bg-[#111111]',
+            svgPath: 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z',
+            url: 'https://x.com'
         },
-        { 
-            name: 'Twitch', 
-            bgColor: 'bg-[#9146FF]', 
-            svgPath: 'M11.571 4.714h1.715v5.143H11.57zm3.002 0H16.29v5.143h-1.717zm5.143-3.429v12.857h-5.143l-4.286 4.286v-4.286H4.714V1.285zm1.715-1.714H3v16.286h5.143v4.286l4.286-4.286h5.143z', 
-            url: 'https://twitch.tv' 
+        {
+            name: 'Twitch',
+            bgColor: 'bg-[#9146FF]',
+            svgPath: 'M11.571 4.714h1.715v5.143H11.57zm3.002 0H16.29v5.143h-1.717zm5.143-3.429v12.857h-5.143l-4.286 4.286v-4.286H4.714V1.285zm1.715-1.714H3v16.286h5.143v4.286l4.286-4.286h5.143z',
+            url: 'https://twitch.tv'
         },
-        { 
-            name: 'Patreon', 
-            bgColor: 'bg-[#FF424D]', 
-            svgPath: 'M22.957 7.21c-.004-3.078-2.584-5.56-5.438-5.56-3.04 0-5.502 2.44-5.502 5.437 0 2.928 2.42 5.314 5.324 5.314 2.9 0 5.62-2.28 5.614-5.19zM0 21.68h3.987V1.65H0z', 
-            url: 'https://patreon.com' 
+        {
+            name: 'Patreon',
+            bgColor: 'bg-[#FF424D]',
+            svgPath: 'M22.957 7.21c-.004-3.078-2.584-5.56-5.438-5.56-3.04 0-5.502 2.44-5.502 5.437 0 2.928 2.42 5.314 5.324 5.314 2.9 0 5.62-2.28 5.614-5.19zM0 21.68h3.987V1.65H0z',
+            url: 'https://patreon.com'
         },
-        { 
-            name: 'Shopify', 
-            bgColor: 'bg-[#96bf48]', 
-            svgPath: 'M19.53 5.33a1.27 1.27 0 0 0-1.2-.67l-2.59.18a3.1 3.1 0 0 0-.52-1.37l1.7-1.7a.89.89 0 0 0-.25-1.45l-3.32-1.12a2.3 2.3 0 0 0-1.89.33L3.25 5.56A2.24 2.24 0 0 0 2.2 7.37L3.9 19.83a2.23 2.23 0 0 0 2.19 1.94h10a2.23 2.23 0 0 0 2.19-1.94L19.9 7.37a2.24 2.24 0 0 0-.37-2.04zM10 2.22l2 .67-2.67 2.67-1.33-1.34zm6.09 17.61a.57.57 0 0 1-.56.5H6.09a.57.57 0 0 1-.56-.5L3.9 7.37a.57.57 0 0 1 .27-.51l8.22-6a.57.57 0 0 1 .47-.08l3.32 1.12a.57.57 0 0 1 .06.37l-1.7 1.7a.57.57 0 0 1-.77-.07zm.81-8.5a.75.75 0 0 0-.75.75v3a.75.75 0 0 0 1.5 0v-3a.75.75 0 0 0-.75-.75z', 
-            url: 'https://shopify.com' 
+        {
+            name: 'Shopify',
+            bgColor: 'bg-[#96bf48]',
+            svgPath: 'M19.53 5.33a1.27 1.27 0 0 0-1.2-.67l-2.59.18a3.1 3.1 0 0 0-.52-1.37l1.7-1.7a.89.89 0 0 0-.25-1.45l-3.32-1.12a2.3 2.3 0 0 0-1.89.33L3.25 5.56A2.24 2.24 0 0 0 2.2 7.37L3.9 19.83a2.23 2.23 0 0 0 2.19 1.94h10a2.23 2.23 0 0 0 2.19-1.94L19.9 7.37a2.24 2.24 0 0 0-.37-2.04zM10 2.22l2 .67-2.67 2.67-1.33-1.34zm6.09 17.61a.57.57 0 0 1-.56.5H6.09a.57.57 0 0 1-.56-.5L3.9 7.37a.57.57 0 0 1 .27-.51l8.22-6a.57.57 0 0 1 .47-.08l3.32 1.12a.57.57 0 0 1 .06.37l-1.7 1.7a.57.57 0 0 1-.77-.07zm.81-8.5a.75.75 0 0 0-.75.75v3a.75.75 0 0 0 1.5 0v-3a.75.75 0 0 0-.75-.75z',
+            url: 'https://shopify.com'
         }
     ]
 
-    const influencers = [
+    const [influencers, setInfluencers] = useState([
         {
             name: 'Selena Gomez',
             tag: '@selenagomez',
@@ -358,9 +409,9 @@ const LandingPage = () => {
             avatarImg: '/selena_avatar.png',
             bio: 'Connecting fans worldwide to new music releases, cosmetic lines, and mental health campaigns.',
             socials: [
-                { platform: 'Spotify 🎵', url: 'https://open.spotify.com/artist/0C801y3Ky2z2JW313KOr6c' },
-                { platform: 'Instagram 📸', url: 'https://instagram.com/selenagomez' },
-                { platform: 'YouTube 📺', url: 'https://www.youtube.com/user/SelenaGomezVEVO' }
+                { platform: 'Official Twitter / X', url: 'https://twitter.com/selenagomez' },
+                { platform: 'Official Instagram', url: 'https://instagram.com/selenagomez' },
+                { platform: 'Selena Gomez YouTube Channel', url: 'https://www.youtube.com/@SelenaGomez' }
             ]
         },
         {
@@ -370,8 +421,8 @@ const LandingPage = () => {
             avatarImg: '/pharrell_avatar.png',
             bio: 'Bringing together apparel capsules, creative records, and community initiatives.',
             socials: [
-                { platform: 'Spotify 🎵', url: 'https://open.spotify.com/artist/2rFgcrclgrH4H3fSA42sOk' },
-                { platform: 'Instagram 📸', url: 'https://instagram.com/pharrell' }
+                { platform: 'Official YouTube', url: 'https://www.youtube.com/pharrell' },
+                { platform: 'Official Instagram', url: 'https://instagram.com/pharrell' }
             ]
         },
         {
@@ -381,8 +432,8 @@ const LandingPage = () => {
             avatarImg: '/tony_avatar.png',
             bio: 'Directing fans to skateboard merchandise, charity updates, and skatepark initiatives.',
             socials: [
-                { platform: 'Instagram 📸', url: 'https://instagram.com/tonyhawk' },
-                { platform: 'Twitter / X 🐦', url: 'https://x.com/tonyhawk' }
+                { platform: 'Official Instagram', url: 'https://instagram.com/tonyhawk' },
+                { platform: 'Official Twitter / X', url: 'https://twitter.com/tonyhawk' }
             ]
         },
         {
@@ -392,11 +443,70 @@ const LandingPage = () => {
             avatarImg: '/comedy_avatar.png',
             bio: 'Directing viewers to the latest stand-up schedules, clips, and trending skits.',
             socials: [
-                { platform: 'TikTok 📱', url: 'https://www.tiktok.com/@comedycentral' },
-                { platform: 'YouTube 📺', url: 'https://www.youtube.com/user/ComedyCentral' }
+                { platform: 'Comedy Central TikTok', url: 'https://www.tiktok.com/@comedycentral' },
+                { platform: 'Comedy Central YouTube', url: 'https://www.youtube.com/@comedycentral' }
             ]
         }
-    ]
+    ])
+
+    useEffect(() => {
+        const fetchInfluencerLinks = async () => {
+            const usernames = ['selenagomez', 'pharrell', 'tonyhawk', 'comedycentral']
+            try {
+                const updated = await Promise.all(
+                    usernames.map(async (username) => {
+                        const res = await fetch(`/api/links/${username}`)
+                        if (!res.ok) throw new Error(`Failed to fetch for ${username}`)
+                        const data = await res.json()
+                        const dbSocials = (data.links || []).map(lnk => ({
+                            platform: lnk.title,
+                            url: lnk.url
+                        }))
+                        const baseInfluencer = {
+                            'selenagomez': {
+                                name: 'Selena Gomez',
+                                tag: '@selenagomez',
+                                role: 'Artist & Rare Beauty Founder',
+                                avatarImg: '/selena_avatar.png',
+                                bio: 'Connecting fans worldwide to new music releases, cosmetic lines, and mental health campaigns.'
+                            },
+                            'pharrell': {
+                                name: 'Pharrell Williams',
+                                tag: '@pharrell',
+                                role: 'Musician & Louis Vuitton Director',
+                                avatarImg: '/pharrell_avatar.png',
+                                bio: 'Bringing together apparel capsules, creative records, and community initiatives.'
+                            },
+                            'tonyhawk': {
+                                name: 'Tony Hawk',
+                                tag: '@tonyhawk',
+                                role: 'Skateboard Legend & Philanthropist',
+                                avatarImg: '/tony_avatar.png',
+                                bio: 'Directing fans to skateboard merchandise, charity updates, and skatepark initiatives.'
+                            },
+                            'comedycentral': {
+                                name: 'Comedy Central',
+                                tag: '@comedycentral',
+                                role: 'Official Comedy Network',
+                                avatarImg: '/comedy_avatar.png',
+                                bio: 'Directing viewers to the latest stand-up schedules, clips, and trending skits.'
+                            }
+                        }[username]
+                        return {
+                            ...baseInfluencer,
+                            socials: dbSocials.length > 0 ? dbSocials : [
+                                { platform: 'Official Instagram', url: `https://instagram.com/${username}` }
+                            ]
+                        }
+                    })
+                )
+                setInfluencers(updated)
+            } catch (err) {
+                console.error('Error fetching database influencers:', err)
+            }
+        }
+        fetchInfluencerLinks()
+    }, [])
 
     const handleManualTabSelect = (tab) => {
         setIsAuto(false)
@@ -408,7 +518,7 @@ const LandingPage = () => {
         // After completion: static stacked layout, no transitions
         if (platformDone) {
             return {
-                transform: `translateY(${-24 * idx}px) scale(${1 - 0.04 * idx})`,
+                transform: `translateY(${60 - 16 * idx}px) scale(${1 - 0.04 * idx})`,
                 opacity: 1,
                 zIndex: 50 - idx,
                 pointerEvents: 'auto',
@@ -419,7 +529,7 @@ const LandingPage = () => {
         // Idle state (step 0): all cards hidden below
         if (platformStep === 0) {
             return {
-                transform: 'translateY(140px) scale(0.7)',
+                transform: 'translateY(200px) scale(0.7)',
                 opacity: 0,
                 zIndex: 10,
                 pointerEvents: 'none'
@@ -431,7 +541,7 @@ const LandingPage = () => {
         // Last step = all cards shown → stacked
         if (platformStep >= platforms.length) {
             return {
-                transform: `translateY(${-24 * idx}px) scale(${1 - 0.04 * idx})`,
+                transform: `translateY(${60 - 16 * idx}px) scale(${1 - 0.04 * idx})`,
                 opacity: 1,
                 zIndex: 50 - idx,
                 pointerEvents: 'auto'
@@ -440,14 +550,14 @@ const LandingPage = () => {
 
         // Active card = centered and scaled up
         if (idx === activeIndex) {
-            return { transform: 'translateY(0px) scale(1.08)', opacity: 1, zIndex: 60, pointerEvents: 'auto' }
+            return { transform: 'translateY(60px) scale(1.08)', opacity: 1, zIndex: 60, pointerEvents: 'auto' }
         }
         // Already seen = slid up and faded
         if (idx < activeIndex) {
-            return { transform: 'translateY(-140px) scale(0.7)', opacity: 0, zIndex: 10, pointerEvents: 'none' }
+            return { transform: 'translateY(-80px) scale(0.7)', opacity: 0, zIndex: 10, pointerEvents: 'none' }
         }
         // Waiting below
-        return { transform: 'translateY(140px) scale(0.7)', opacity: 0, zIndex: 10, pointerEvents: 'none' }
+        return { transform: 'translateY(200px) scale(0.7)', opacity: 0, zIndex: 10, pointerEvents: 'none' }
     }
 
     return (
@@ -476,10 +586,10 @@ const LandingPage = () => {
                     {/* Left Column - Form & Copy */}
                     <div className="lg:col-span-6 space-y-8 text-left reveal active">
                         <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-none">
-                            Everything you are. <br/>
+                            Everything you are. <br />
                             <span className="text-[#d2e823]">In one simple link.</span>
                         </h1>
-                        
+
                         <p className="text-md sm:text-lg text-zinc-300 max-w-xl leading-relaxed font-semibold">
                             Join millions of creators globally. Share your social handles, online store, music, and blogs in one clean, modern landing page with LinkHub.
                         </p>
@@ -497,8 +607,8 @@ const LandingPage = () => {
                                     className="w-full rounded-full border border-zinc-800 bg-[#0f1115]/80 py-4 pl-24 pr-4 text-sm text-white placeholder-zinc-600 font-bold focus:outline-none focus:ring-2 focus:ring-[#d2e823] focus:border-transparent transition-all"
                                 />
                             </div>
-                            <button 
-                                type="submit" 
+                            <button
+                                type="submit"
                                 className="px-8 py-4 rounded-full bg-[#d2e823] text-[#1e2330] font-black hover:bg-white hover:text-[#1e2330] hover:-translate-y-[2px] hover:shadow-md active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer shrink-0"
                             >
                                 Claim LinkHub
@@ -509,7 +619,7 @@ const LandingPage = () => {
                     {/* Right Column - Animated Mobile mockup & floating user panels */}
                     <div className="lg:col-span-6 relative flex items-center justify-center min-h-[500px]">
                         {/* Floating user card 1: Selena Gomez (left) */}
-                        <div className="absolute left-0 top-12 z-20 bg-white border border-slate-100 rounded-[24px] p-4 shadow-xl flex items-center gap-3.5 max-w-[190px] animate-float-slow hover:scale-105 hover:rotate-1 transition-all duration-300">
+                        <div className="hidden sm:flex absolute left-0 top-12 z-20 bg-white border border-slate-100 rounded-[24px] p-4 shadow-xl items-center gap-3.5 max-w-[190px] animate-float-slow hover:scale-105 hover:rotate-1 transition-all duration-300">
                             <img src="/selena_avatar.png" className="w-10 h-10 rounded-full object-cover shadow-inner" alt="Selena Gomez" />
                             <div>
                                 <h4 className="text-xs font-black text-[#1e2330]">@selenagomez</h4>
@@ -518,7 +628,7 @@ const LandingPage = () => {
                         </div>
 
                         {/* Floating user card 2: Pharrell Williams (right) */}
-                        <div className="absolute right-0 top-36 z-20 bg-white border border-slate-100 rounded-[24px] p-4 shadow-xl flex items-center gap-3.5 max-w-[190px] animate-float-medium hover:scale-105 hover:-rotate-1 transition-all duration-300">
+                        <div className="hidden sm:flex absolute right-0 top-36 z-20 bg-white border border-slate-100 rounded-[24px] p-4 shadow-xl items-center gap-3.5 max-w-[190px] animate-float-medium hover:scale-105 hover:-rotate-1 transition-all duration-300">
                             <img src="/pharrell_avatar.png" className="w-10 h-10 rounded-full object-cover shadow-inner" alt="Pharrell Williams" />
                             <div>
                                 <h4 className="text-xs font-black text-[#1e2330]">@pharrell</h4>
@@ -527,7 +637,7 @@ const LandingPage = () => {
                         </div>
 
                         {/* Floating user card 3: Tony Hawk (bottom left) */}
-                        <div className="absolute left-6 bottom-4 z-20 bg-white border border-slate-100 rounded-[24px] p-4 shadow-xl flex items-center gap-3.5 max-w-[190px] animate-float-fast hover:scale-105 hover:rotate-1 transition-all duration-300">
+                        <div className="hidden sm:flex absolute left-6 bottom-4 z-20 bg-white border border-slate-100 rounded-[24px] p-4 shadow-xl items-center gap-3.5 max-w-[190px] animate-float-fast hover:scale-105 hover:rotate-1 transition-all duration-300">
                             <img src="/tony_avatar.png" className="w-10 h-10 rounded-full object-cover shadow-inner" alt="Tony Hawk" />
                             <div>
                                 <h4 className="text-xs font-black text-[#1e2330]">@tonyhawk</h4>
@@ -538,7 +648,7 @@ const LandingPage = () => {
                         {/* Centered Phone Preview */}
                         <div className="relative w-full max-w-[270px] aspect-[9/18] rounded-[44px] bg-[#1e2330] p-2.5 shadow-2xl transition-all duration-300 hover:scale-[1.02]">
                             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-3.5 bg-[#1e2330] rounded-full z-20"></div>
-                            
+
                             <div className={`w-full h-full rounded-[35px] ${currentMockup.bg} p-4 pt-8 flex flex-col justify-between relative overflow-hidden transition-colors duration-300`}>
                                 <div className="w-full flex flex-col items-center gap-2 pt-2">
                                     <img src={currentMockup.avatarImg} className="w-12 h-12 rounded-full object-cover shadow-sm transition-transform duration-300" alt={currentMockup.title} />
@@ -551,16 +661,15 @@ const LandingPage = () => {
                                 {/* Dynamic Auto-clicking Link Items inside mockup */}
                                 <div className="w-full space-y-2.5 my-auto z-10">
                                     {currentMockup.links.map((lnk, i) => (
-                                        <a 
+                                        <a
                                             key={i}
                                             href={lnk.url}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className={`block w-full rounded-full p-2.5 text-center transition-all duration-300 ${
-                                                i === activeLinkIndex 
-                                                    ? 'bg-[#1e2330] text-white scale-[1.05] shadow-lg border border-[#d2e823]/60' 
-                                                    : 'bg-white text-[#1e2330] hover:scale-[1.02] shadow-sm'
-                                            }`}
+                                            className={`block w-full rounded-full p-2.5 text-center transition-all duration-300 ${i === activeLinkIndex
+                                                ? 'bg-[#1e2330] text-white scale-[1.05] shadow-lg border border-[#d2e823]/60'
+                                                : 'bg-white text-[#1e2330] hover:scale-[1.02] shadow-sm'
+                                                }`}
                                         >
                                             <h4 className="text-[10px] font-black">{lnk.title}</h4>
                                         </a>
@@ -584,11 +693,10 @@ const LandingPage = () => {
                             <button
                                 key={tab}
                                 onClick={() => handleManualTabSelect(tab)}
-                                className={`px-5 py-2 rounded-full text-xs font-black capitalize transition-all duration-200 active:scale-[0.95] ${
-                                    selectedTab === tab 
-                                        ? 'bg-[#1e2330] text-white -translate-y-px shadow-sm' 
-                                        : 'text-[#1e2330]/70 hover:bg-white/55'
-                                }`}
+                                className={`px-5 py-2 rounded-full text-xs font-black capitalize transition-all duration-200 active:scale-[0.95] ${selectedTab === tab
+                                    ? 'bg-[#1e2330] text-white -translate-y-px shadow-sm'
+                                    : 'text-[#1e2330]/70 hover:bg-white/55'
+                                    }`}
                             >
                                 {tab}
                             </button>
@@ -602,9 +710,7 @@ const LandingPage = () => {
                 <div className="max-w-7xl mx-auto px-6 grid gap-16 lg:grid-cols-12 items-center">
                     {/* Left side: Typography */}
                     <div className="lg:col-span-5 text-left space-y-6">
-                        <div className="inline-block bg-[#d2e823] text-[#1e2330] font-mono text-xs px-3 py-1 rounded font-black tracking-widest">
-                            LINKHUB LIVE
-                        </div>
+
                         <h2 className="text-4xl sm:text-5xl font-black font-sans tracking-tighter leading-none text-white space-y-2">
                             <span className="block">STACK YOUR LINKS.</span>
                             <span className="block text-zinc-500">DYNAMIC FLOW.</span>
@@ -613,10 +719,7 @@ const LandingPage = () => {
                         <p className="text-sm font-semibold text-zinc-400 max-w-sm leading-relaxed">
                             Organize all of your digital networks in a single gorgeous card stack. Hover to expand, scroll to snap together.
                         </p>
-                        <div className="border-t border-zinc-800 pt-6">
-                            <span className="text-[10px] font-mono text-zinc-500 tracking-widest uppercase block">Release Date:</span>
-                            <span className="text-xs font-mono font-black text-zinc-300">JUN 21 - 2026</span>
-                        </div>
+
                     </div>
 
                     {/* Right side: Polaroid Fan Out Stack of Real Celeb data */}
@@ -655,8 +758,8 @@ const LandingPage = () => {
             </section>
 
             {/* Platform Integration Section (Wheel-locked step-through) */}
-            <section 
-                ref={platformSectionRef} 
+            <section
+                ref={platformSectionRef}
                 className="relative w-full min-h-screen bg-white border-b border-slate-100 flex flex-col justify-center items-center py-24 overflow-hidden"
             >
                 <div className="max-w-2xl text-center space-y-4 px-6 mb-8">
@@ -677,9 +780,8 @@ const LandingPage = () => {
                         {platforms.map((_, i) => (
                             <div
                                 key={i}
-                                className={`h-1.5 rounded-full transition-all duration-300 ${
-                                    i < platformStep ? 'w-6 bg-[#1e2330]' : 'w-1.5 bg-[#1e2330]/20'
-                                }`}
+                                className={`h-1.5 rounded-full transition-all duration-300 ${i < platformStep ? 'w-6 bg-[#1e2330]' : 'w-1.5 bg-[#1e2330]/20'
+                                    }`}
                             />
                         ))}
                     </div>
@@ -702,7 +804,7 @@ const LandingPage = () => {
                                     Active
                                 </span>
                             </div>
-                            
+
                             <div className="flex justify-center my-auto">
                                 <svg className="h-14 w-14 fill-current text-white" viewBox="0 0 24 24">
                                     <path d={plat.svgPath} />
@@ -711,7 +813,6 @@ const LandingPage = () => {
 
                             <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest opacity-80">
                                 <span>LinkHub Sync</span>
-                                <span>↗</span>
                             </div>
                         </a>
                     ))}
@@ -719,7 +820,7 @@ const LandingPage = () => {
             </section>
 
             {/* Verified Influencers/Creators Section - 3D tilting cards */}
-            <section className="w-full py-24 bg-[#eff0ec]/30 border-b border-slate-100 reveal">
+            <section className="w-full py-24 bg-[#e5eedc] border-b border-[#cde0c0] reveal">
                 <div className="max-w-7xl mx-auto px-6 space-y-16">
                     <div className="text-center max-w-2xl mx-auto space-y-4">
                         <span className="inline-block px-3 py-1 rounded-full bg-[#254f1a] text-xs font-black uppercase tracking-wider text-white">
@@ -756,79 +857,81 @@ const LandingPage = () => {
             </section>
 
             {/* Creator Showcase Gallery (Real Celeb Showcase Cards) */}
-            <section className="max-w-7xl mx-auto px-6 py-20 lg:py-28 space-y-16 reveal">
-                <div className="text-center max-w-2xl mx-auto space-y-4">
-                    <h2 className="text-4xl lg:text-5xl font-black text-[#1e2330] tracking-tight leading-tight">
-                        One link to rule them all.
-                    </h2>
-                    <p className="text-sm font-semibold text-[#1e2330]/60">Explore some of our active creators page layouts</p>
-                </div>
-
-                <div className="grid gap-8 md:grid-cols-3">
-                    {/* Creator Card 1: Selena Gomez */}
-                    <div className="reveal bg-[#eff0ec] p-8 rounded-[36px] hover:-translate-y-[6px] hover:shadow-2xl hover:bg-white border border-transparent hover:border-slate-100 transition-all duration-300 group" style={{ transitionDelay: '0ms' }}>
-                        <div className="flex items-center gap-4 mb-6">
-                            <img src="/selena_avatar.png" className="w-12 h-12 rounded-full object-cover shadow-sm animate-pulse-glow" alt="Selena Gomez" />
-                            <div>
-                                <h3 className="text-lg font-black text-[#1e2330]">Selena Gomez</h3>
-                                <p className="text-xs font-bold text-[#1e2330]/60">Singer & Artist</p>
-                            </div>
-                        </div>
-                        <p className="text-xs font-semibold text-[#1e2330]/75 leading-relaxed mb-6">
-                            Selena connects her Spotify, Instagram, and VEVO channel inside one clean aesthetic profile page.
-                        </p>
-                        <div className="space-y-2">
-                            <a href="https://open.spotify.com/artist/0C801y3Ky2z2JW313KOr6c" target="_blank" rel="noreferrer" className="block w-full text-center p-3 rounded-full bg-white text-xs font-black text-[#1e2330] hover:bg-[#1e2330] hover:text-white transition duration-200">
-                                Spotify 🎵
-                            </a>
-                            <Link to="/officialcreator" className="block w-full text-center p-3 rounded-full bg-[#d2e823] text-xs font-black text-[#1e2330] hover:scale-[1.02] transition duration-200">
-                                View Full Profile
-                            </Link>
-                        </div>
+            <section className="w-full py-20 lg:py-28 bg-[#eff0ec] border-b border-slate-200/60 reveal">
+                <div className="max-w-7xl mx-auto px-6 space-y-16">
+                    <div className="text-center max-w-2xl mx-auto space-y-4">
+                        <h2 className="text-4xl lg:text-5xl font-black text-[#1e2330] tracking-tight leading-tight">
+                            One link to rule them all.
+                        </h2>
+                        <p className="text-sm font-semibold text-[#1e2330]/60">Explore some of our active creators page layouts</p>
                     </div>
 
-                    {/* Creator Card 2: Pharrell Williams */}
-                    <div className="reveal bg-[#eff0ec] p-8 rounded-[36px] hover:-translate-y-[6px] hover:shadow-2xl hover:bg-white border border-transparent hover:border-slate-100 transition-all duration-300 group" style={{ transitionDelay: '150ms' }}>
-                        <div className="flex items-center gap-4 mb-6">
-                            <img src="/pharrell_avatar.png" className="w-12 h-12 rounded-full object-cover shadow-sm animate-pulse-glow" alt="Pharrell Williams" />
-                            <div>
-                                <h3 className="text-lg font-black text-[#1e2330]">Pharrell Williams</h3>
-                                <p className="text-xs font-bold text-[#1e2330]/60">Musician & Designer</p>
+                    <div className="grid gap-8 md:grid-cols-3">
+                        {/* Creator Card 1: Selena Gomez */}
+                        <ShowcaseCard delay="0ms">
+                            <div className="flex items-center gap-4 mb-6">
+                                <img src="/selena_avatar.png" className="w-12 h-12 rounded-full object-cover shadow-sm animate-pulse-glow" alt="Selena Gomez" />
+                                <div>
+                                    <h3 className="text-lg font-black text-[#1e2330]">Selena Gomez</h3>
+                                    <p className="text-xs font-bold text-[#1e2330]/60">Singer & Artist</p>
+                                </div>
                             </div>
-                        </div>
-                        <p className="text-xs font-semibold text-[#1e2330]/75 leading-relaxed mb-6">
-                            Pharrell organizes his music albums, Instagram portfolio, and fashion releases using our high-contrast layout.
-                        </p>
-                        <div className="space-y-2">
-                            <a href="https://open.spotify.com/artist/2rFgcrclgrH4H3fSA42sOk" target="_blank" rel="noreferrer" className="block w-full text-center p-3 rounded-full bg-white text-xs font-black text-[#1e2330] hover:bg-[#1e2330] hover:text-white transition duration-200">
-                                Spotify 🎵
-                            </a>
-                            <Link to="/samcreative" className="block w-full text-center p-3 rounded-full bg-[#d2e823] text-xs font-black text-[#1e2330] hover:scale-[1.02] transition duration-200">
-                                View Full Profile
-                            </Link>
-                        </div>
-                    </div>
+                            <p className="text-xs font-semibold text-[#1e2330]/75 leading-relaxed mb-6">
+                                Selena connects her TikTok, Instagram, and YouTube channel inside one clean aesthetic profile page.
+                            </p>
+                            <div className="space-y-2">
+                                <a href="https://www.tiktok.com/@selenagomez" target="_blank" rel="noreferrer" className="block w-full text-center p-3 rounded-full bg-white border border-slate-100 text-xs font-black text-[#1e2330] hover:bg-[#1e2330] hover:text-white transition duration-200">
+                                    TikTok
+                                </a>
+                                <Link to="/selenagomez" className="block w-full text-center p-3 rounded-full bg-[#d2e823] text-xs font-black text-[#1e2330] hover:scale-[1.02] transition duration-200">
+                                    View Full Profile
+                                </Link>
+                            </div>
+                        </ShowcaseCard>
 
-                    {/* Creator Card 3: Tony Hawk */}
-                    <div className="reveal bg-[#eff0ec] p-8 rounded-[36px] hover:-translate-y-[6px] hover:shadow-2xl hover:bg-white border border-transparent hover:border-slate-100 transition-all duration-300 group" style={{ transitionDelay: '300ms' }}>
-                        <div className="flex items-center gap-4 mb-6">
-                            <img src="/tony_avatar.png" className="w-12 h-12 rounded-full object-cover shadow-sm animate-pulse-glow" alt="Tony Hawk" />
-                            <div>
-                                <h3 className="text-lg font-black text-[#1e2330]">Tony Hawk</h3>
-                                <p className="text-xs font-bold text-[#1e2330]/60">Skateboarding Icon</p>
+                        {/* Creator Card 2: Pharrell Williams */}
+                        <ShowcaseCard delay="150ms">
+                            <div className="flex items-center gap-4 mb-6">
+                                <img src="/pharrell_avatar.png" className="w-12 h-12 rounded-full object-cover shadow-sm animate-pulse-glow" alt="Pharrell Williams" />
+                                <div>
+                                    <h3 className="text-lg font-black text-[#1e2330]">Pharrell Williams</h3>
+                                    <p className="text-xs font-bold text-[#1e2330]/60">Musician & Designer</p>
+                                </div>
                             </div>
-                        </div>
-                        <p className="text-xs font-semibold text-[#1e2330]/75 leading-relaxed mb-6">
-                            Tony links his foundation updates, shop merchandise, and Twitter feed within a singular brand link.
-                        </p>
-                        <div className="space-y-2">
-                            <a href="https://x.com/tonyhawk" target="_blank" rel="noreferrer" className="block w-full text-center p-3 rounded-full bg-white text-xs font-black text-[#1e2330] hover:bg-[#1e2330] hover:text-white transition duration-200">
-                                Twitter / X 🐦
-                            </a>
-                            <Link to="/bloomflowers" className="block w-full text-center p-3 rounded-full bg-[#d2e823] text-xs font-black text-[#1e2330] hover:scale-[1.02] transition duration-200">
-                                View Full Profile
-                            </Link>
-                        </div>
+                            <p className="text-xs font-semibold text-[#1e2330]/75 leading-relaxed mb-6">
+                                Pharrell organizes his music albums, Instagram portfolio, and fashion releases using our high-contrast layout.
+                            </p>
+                            <div className="space-y-2">
+                                <a href="https://www.youtube.com/@PharrellWilliams" target="_blank" rel="noreferrer" className="block w-full text-center p-3 rounded-full bg-white border border-slate-100 text-xs font-black text-[#1e2330] hover:bg-[#1e2330] hover:text-white transition duration-200">
+                                    YouTube
+                                </a>
+                                <Link to="/pharrell" className="block w-full text-center p-3 rounded-full bg-[#d2e823] text-xs font-black text-[#1e2330] hover:scale-[1.02] transition duration-200">
+                                    View Full Profile
+                                </Link>
+                            </div>
+                        </ShowcaseCard>
+
+                        {/* Creator Card 3: Tony Hawk */}
+                        <ShowcaseCard delay="300ms">
+                            <div className="flex items-center gap-4 mb-6">
+                                <img src="/tony_avatar.png" className="w-12 h-12 rounded-full object-cover shadow-sm animate-pulse-glow" alt="Tony Hawk" />
+                                <div>
+                                    <h3 className="text-lg font-black text-[#1e2330]">Tony Hawk</h3>
+                                    <p className="text-xs font-bold text-[#1e2330]/60">Skateboarding Icon</p>
+                                </div>
+                            </div>
+                            <p className="text-xs font-semibold text-[#1e2330]/75 leading-relaxed mb-6">
+                                Tony links his foundation updates, shop merchandise, and Twitter feed within a singular brand link.
+                            </p>
+                            <div className="space-y-2">
+                                <a href="https://x.com/tonyhawk" target="_blank" rel="noreferrer" className="block w-full text-center p-3 rounded-full bg-white border border-slate-100 text-xs font-black text-[#1e2330] hover:bg-[#1e2330] hover:text-white transition duration-200">
+                                    Twitter / X
+                                </a>
+                                <Link to="/tonyhawk" className="block w-full text-center p-3 rounded-full bg-[#d2e823] text-xs font-black text-[#1e2330] hover:scale-[1.02] transition duration-200">
+                                    View Full Profile
+                                </Link>
+                            </div>
+                        </ShowcaseCard>
                     </div>
                 </div>
             </section>
@@ -843,7 +946,7 @@ const LandingPage = () => {
 
                     <div className="space-y-4">
                         {faqs.map((faq, idx) => (
-                            <div 
+                            <div
                                 key={idx}
                                 className="border-b border-white/20 pb-4 cursor-pointer group"
                                 onClick={() => toggleFaq(idx)}
@@ -851,9 +954,9 @@ const LandingPage = () => {
                                 <div className="flex justify-between items-center py-4 group-hover:opacity-90 transition-opacity">
                                     <h3 className="text-md sm:text-lg font-black">{faq.q}</h3>
                                     <span className="text-xl font-black">
-                                        <svg 
-                                            className={`h-5 w-5 stroke-current fill-none transform transition-transform duration-300 ${faqOpen === idx ? 'rotate-180' : 'rotate-0'}`} 
-                                            viewBox="0 0 24 24" 
+                                        <svg
+                                            className={`h-5 w-5 stroke-current fill-none transform transition-transform duration-300 ${faqOpen === idx ? 'rotate-180' : 'rotate-0'}`}
+                                            viewBox="0 0 24 24"
                                             strokeWidth="3"
                                         >
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -881,8 +984,8 @@ const LandingPage = () => {
                         Claim your unique username, organize your online life, and start exploring user clicks in under one minute.
                     </p>
                     <div className="pt-4">
-                        <Link 
-                            to="/register" 
+                        <Link
+                            to="/register"
                             className="inline-block px-10 py-5 rounded-full bg-[#d2e823] text-[#1e2330] font-black hover:-translate-y-[3px] hover:shadow-2xl active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
                         >
                             Get Started for Free
@@ -890,6 +993,30 @@ const LandingPage = () => {
                     </div>
                 </div>
             </section>
+
+            {/* Premium Interactive Footer */}
+            <footer className="bg-[#191d28] border-t border-zinc-800 text-slate-400 py-12 font-sans">
+                <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex flex-col items-center md:items-start gap-2">
+                        <Link to="/" className="text-xl font-black tracking-tight text-white hover:opacity-90">
+                            LinkHub
+                        </Link>
+                        <p className="text-[11px] font-semibold text-slate-500 text-center md:text-left">
+                            The professional link-in-bio portfolio for digital creators.
+                        </p>
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-6 text-xs font-bold text-slate-400">
+                        <Link to="/register" className="hover:text-white transition">Get Started</Link>
+                        <Link to="/login" className="hover:text-white transition">Admin Panel</Link>
+                        <Link to="/selenagomez" className="hover:text-white transition">Selena Gomez</Link>
+                        <Link to="/pharrell" className="hover:text-white transition">Pharrell Williams</Link>
+                        <Link to="/tonyhawk" className="hover:text-white transition">Tony Hawk</Link>
+                    </div>
+                </div>
+                <div className="max-w-7xl mx-auto px-6 mt-8 pt-8 border-t border-zinc-800/40 text-center text-[10px] font-semibold text-slate-600">
+                    <p>© {new Date().getFullYear()} LinkHub. All rights reserved. Built for creators worldwide.</p>
+                </div>
+            </footer>
         </main>
     )
 }

@@ -1,4 +1,4 @@
-import { getLinks, linkClick, addLink } from '../services/home.api'
+import { getLinks, linkClick, addLink, updateLinkApi, deleteLinkApi } from '../services/home.api'
 
 
 export const useHome = () => {
@@ -33,10 +33,32 @@ export const useHome = () => {
         }
     }
 
+    const modifyLink = async ({ linkId, title, url }) => {
+        try {
+            const response = await updateLinkApi({ linkId, title, url })
+            return response
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
+
+    const removeLink = async ({ linkId }) => {
+        try {
+            const response = await deleteLinkApi({ linkId })
+            return response
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
+
     return {
         fetchLinks,
         handleLinkClick,
-        createNewLink
+        createNewLink,
+        modifyLink,
+        removeLink
     }
 
 }

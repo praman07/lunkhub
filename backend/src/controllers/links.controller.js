@@ -176,4 +176,75 @@ export const getLinkAnalyticsByUsername = async (req, res) => {
             message: error.message || 'Failed to retrieve analytics',
         });
     }
+};
+
+export const updateLink = async (req, res) => {
+    const { linkId } = req.params;
+    const { title, url } = req.body;
+
+    if (!title || !url) {
+        return res.status(400).json({
+            message: 'Title and URL are required',
+        });
+    }
+
+    try {
+        const link = await linkModel.findById(linkId);
+
+        if (!link) {
+            return res.status(404).json({
+                message: 'Link not found',
+            });
+        }
+
+        if (link.user.toString() !== req.user.id) {
+            return res.status(403).json({
+                message: 'Access denied: You do not own this link',
+            });
+        }
+
+        link.title = title;
+        link.url = url;
+        await link.save();
+
+        return res.status(200).json({
+            message: 'Link updated successfully',
+            link,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message || 'Failed to update link',
+        });
+    }
+};
+
+export const deleteLink = async (req, res) => {
+    const { linkId } = req.params;
+
+    try {
+        const link = await linkModel.findById(linkId);
+
+        if (!link) {
+            return res.status(404).json({
+                message: 'Link not found',
+            });
+        }
+
+        if (link.user.toString() !== req.user.id) {
+            return res.status(403).json({
+                message: 'Access denied: You do not own this link',
+            });
+        }
+
+        await linkModel.deleteOne({ _id: linkId });
+        await clickModel.deleteMany({ link: linkId });
+
+        return res.status(200).json({
+            message: 'Link deleted successfully',
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message || 'Failed to delete link',
+        });
+    }
 };

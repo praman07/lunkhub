@@ -175,7 +175,7 @@ const LandingPage = () => {
     // Wheel-event hijack for Platform Stack (locks outer scroll, steps cards)
     useEffect(() => {
         const TOTAL_STEPS = platforms.length  // 8 cards → steps 1-8, then done
-        const COOLDOWN_MS = 180
+        const COOLDOWN_MS = 700
 
         const handleWheel = (e) => {
             // After completion, never intercept again
@@ -517,14 +517,14 @@ const LandingPage = () => {
 
     // Step-driven card styles (replaces old scroll-progress approach)
     const getPlatformCardStyle = (idx) => {
-        // After completion: static stacked layout, no transitions
+        // After completion: static stacked layout
         if (platformDone) {
             return {
                 transform: `translateY(${60 - 16 * idx}px) scale(${1 - 0.04 * idx})`,
                 opacity: 1,
                 zIndex: 50 - idx,
                 pointerEvents: 'auto',
-                transition: 'none'
+                transition: 'transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1)'
             }
         }
 
@@ -534,7 +534,8 @@ const LandingPage = () => {
                 transform: 'translateY(200px) scale(0.7)',
                 opacity: 0,
                 zIndex: 10,
-                pointerEvents: 'none'
+                pointerEvents: 'none',
+                transition: 'transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1)'
             }
         }
 
@@ -546,20 +547,39 @@ const LandingPage = () => {
                 transform: `translateY(${60 - 16 * idx}px) scale(${1 - 0.04 * idx})`,
                 opacity: 1,
                 zIndex: 50 - idx,
-                pointerEvents: 'auto'
+                pointerEvents: 'auto',
+                transition: 'transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1)'
             }
         }
 
         // Active card = centered and scaled up
         if (idx === activeIndex) {
-            return { transform: 'translateY(60px) scale(1.08)', opacity: 1, zIndex: 60, pointerEvents: 'auto' }
+            return {
+                transform: 'translateY(60px) scale(1.08)',
+                opacity: 1,
+                zIndex: 60,
+                pointerEvents: 'auto',
+                transition: 'transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1)'
+            }
         }
         // Already seen = slid up and faded
         if (idx < activeIndex) {
-            return { transform: 'translateY(-80px) scale(0.7)', opacity: 0, zIndex: 10, pointerEvents: 'none' }
+            return {
+                transform: 'translateY(-80px) scale(0.7)',
+                opacity: 0,
+                zIndex: 10,
+                pointerEvents: 'none',
+                transition: 'transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1)'
+            }
         }
         // Waiting below
-        return { transform: 'translateY(200px) scale(0.7)', opacity: 0, zIndex: 10, pointerEvents: 'none' }
+        return {
+            transform: 'translateY(200px) scale(0.7)',
+            opacity: 0,
+            zIndex: 10,
+            pointerEvents: 'none',
+            transition: 'transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1)'
+        }
     }
 
     return (
